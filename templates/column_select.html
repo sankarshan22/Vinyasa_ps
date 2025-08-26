@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinyãsa - Select Columns</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #0d0d0d; color: #fff; overflow-x: hidden; padding: 50px 10%; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 40px; }
+    .logo { font-size: 28px; font-weight: 700; color: #ff4c60; }
+    nav ul { list-style: none; display: flex; gap: 40px; }
+    nav ul li a { text-decoration: none; color: #ccc; font-weight: 500; position: relative; transition: 0.3s ease; }
+    nav ul li a:hover, nav ul li a.active { color: #ff4c60; text-decoration: none; }
+    nav ul li a::after { content: ''; position: absolute; width: 0%; height: 2px; background: #ff4c60; left: 0; bottom: -6px; transition: 0.3s ease; }
+    nav ul li a:hover::after, nav ul li a.active::after { width: 100%; }
+
+    h1 { font-size: 2.5rem; color: #ff4c60; margin-bottom: 30px; text-align: center; }
+
+    .file-section {
+      border: 2px dashed #ff4c60;
+      padding: 30px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      background: #1a1a1a;
+    }
+
+    .file-section h2 {
+      font-size: 1.5rem;
+      color: #ff4c60;
+      margin-bottom: 10px;
+    }
+
+    .file-section h3 {
+      font-size: 1.2rem;
+      color: #ccc;
+      margin: 20px 0 10px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+
+    .dataframe {
+      width: 100%;
+      border-collapse: collapse;
+      background: #0d0d0d;
+      min-width: 600px;
+    }
+
+    .dataframe th, .dataframe td {
+      padding: 10px;
+      border: 1px solid #444;
+      text-align: left;
+      color: #fff;
+    }
+
+    .dataframe th {
+      background: #ff4c60;
+      color: #0d0d0d;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px 40px;
+      margin-top: 20px;
+    }
+
+    .checkbox-grid label {
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 10px;
+      accent-color: #ff4c60;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      display: block;
+      background-color: #ff4c60;
+      color: #0d0d0d;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      margin: 40px auto;
+      transition: 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      box-shadow: 0 0 15px #ff4c60;
+      transform: scale(1.05);
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      color: #ff4c60;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Popup styles */
+    .popup {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .popup-content h2 {
+      color: #ff4c60;
+      margin-bottom: 15px;
+    }
+
+    .popup-content p {
+      margin-bottom: 10px;
+      color: #ccc;
+      font-size: 0.95rem;
+    }
+
+    .popup-content button {
+      background: #ff4c60;
+      color: #0d0d0d;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .popup-content button:hover {
+      box-shadow: 0 0 10px #ff4c60;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">Vinyãsa</div>
+    <nav>
+      <ul>
+        <li><a href="#">About us</a></li>
+        <li><a href="#" id="helpLink">Help</a></li>
+        <li><a href="https://github.com/sankarshan22/tabula-x" target="_blank">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1>Step 1: Select Columns for All Files</h1>
+
+  {% if error_message %}
+    <p style="color:red; text-align:center;"><strong>{{ error_message }}</strong></p>
+  {% endif %}
+
+  <form method="post" action="/display_samples">
+    {% for df_id, data in files.items() %}
+    <div class="file-section">
+      <h2>File: {{ data.filename }}</h2>
+
+      <h3>Data Preview (5 Rows)</h3>
+      <div class="table-container">
+        {{ data.df.head().to_html(classes='dataframe', border=0) | safe }}
+      </div>
+
+      <h3>Select Columns to Transform</h3>
+      <div class="checkbox-grid">
+        {% for c in data.df.columns %}
+        <label>
+          <input type="checkbox" name="selected_columns_{{ df_id }}" value="{{ c }}">{{ c }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <input type="submit" value="Show Samples" class="submit-btn">
+  </form>
+
+  <a href="/">Start Over</a>
+
+  <!-- Help Popup -->
+  <div class="popup" id="helpPopup">
+    <div class="popup-content">
+      <h2>Help Assistance</h2>
+      <p>Please feel free to contact us for any issue you're facing with our project page.</p>
+      <p><strong>Vinyãsa group</strong></p>
+      <p>📞 9391797390</p>
+      <p>✉️ Akash@gmail.com</p>
+      <button onclick="document.getElementById('helpPopup').style.display='none';">Close</button>
+    </div>
+  </div>
+
+  <!-- Popup Script -->
+  <script>
+    document.getElementById("helpLink").addEventListener("click", function(e) {
+      e.preventDefault();
+      document.getElementById("helpPopup").style.display = "flex";
+    });
+  </script>
+</body>
+</html>

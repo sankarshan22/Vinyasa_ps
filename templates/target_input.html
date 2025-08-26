@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinyãsa - Define Transformation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #0d0d0d; color: #fff; overflow-x: hidden; padding: 50px 10%; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 40px; }
+    .logo { font-size: 28px; font-weight: 700; color: #ff4c60; }
+    nav ul { list-style: none; display: flex; gap: 40px; }
+    nav ul li a { text-decoration: none; color: #ccc; font-weight: 500; position: relative; transition: 0.3s ease; }
+    nav ul li a:hover, nav ul li a.active { color: #ff4c60; text-decoration: none; }
+    nav ul li a::after { content: ''; position: absolute; width: 0%; height: 2px; background: #ff4c60; left: 0; bottom: -6px; transition: 0.3s ease; }
+    nav ul li a:hover::after, nav ul li a.active::after { width: 100%; }
+
+    h1 { font-size: 2.5rem; color: #ff4c60; margin-bottom: 30px; text-align: center; }
+
+    p.desc { text-align: center; font-size: 1rem; color: #ccc; margin-bottom: 50px; }
+
+    .file-section {
+      border: 2px dashed #ff4c60;
+      padding: 30px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      background: #1a1a1a;
+    }
+
+    .file-section h2 {
+      font-size: 1.5rem;
+      color: #ff4c60;
+      margin-bottom: 20px;
+    }
+
+    .column-block { border-top: 1px solid #444; padding-top: 15px; margin-top: 15px; }
+    .column-block h3 { font-size: 1.2rem; color: #ccc; margin-bottom: 10px; }
+
+    .input-mode-selector { margin-bottom: 15px; }
+    .input-mode-selector label { margin-right: 20px; font-weight: bold; cursor: pointer; }
+    .input-mode-selector input[type="radio"] { margin-right: 8px; transform: scale(1.2); accent-color: #ff4c60; cursor: pointer; }
+
+    .examples-container ul { list-style: none; padding-left: 0; }
+    .examples-container li { margin-bottom: 15px; background: #0d0d0d; border: 1px solid #444; border-radius: 5px; padding: 10px; }
+    .examples-container code { background: #1a1a1a; padding: 2px 6px; border-radius: 4px; color: #ff4c60; }
+    .examples-container input[type="text"] { width: 250px; padding: 8px; border: none; border-radius: 5px; margin-top: 5px; font-family: 'Poppins', sans-serif; }
+
+    .prompt-container { margin-top: 10px; }
+    .prompt-container textarea { width: 90%; height: 80px; padding: 10px; border-radius: 8px; border: none; font-family: 'Poppins', sans-serif; }
+
+    .submit-btn {
+      display: block;
+      background-color: #ff4c60;
+      color: #0d0d0d;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      margin: 40px auto;
+      transition: 0.3s ease;
+    }
+    .submit-btn:hover { box-shadow: 0 0 15px #ff4c60; transform: scale(1.05); }
+
+    a { display: block; text-align: center; margin-top: 30px; color: #ff4c60; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+
+    /* Help popup styles */
+    .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 999; }
+    .popup-content { background: #1a1a1a; color: #fff; padding: 30px; border-radius: 10px; max-width: 600px; margin: 150px auto; position: relative; text-align: center; }
+    .popup-content h2 { margin-bottom: 20px; color: #ff4c60; }
+    .popup-content p { margin-bottom: 20px; line-height: 1.6; }
+    .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #ff4c60; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">Vinyãsa</div>
+    <nav>
+      <ul>
+        <li><a href="#">About us</a></li>
+        <li><a href="#" onclick="openPopup()">Help</a></li>
+        <li><a href="https://github.com/sankarshan22/tabula-x" target="_blank">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1>Step 3: Define Transformation</h1>
+  <p class="desc">For each column, choose to provide target value examples or a text prompt to generate the transformation.</p>
+
+  <form method="post" action="/review_transformations">
+    {% for df_id, columns in columns_by_file.items() %}
+    <div class="file-section">
+      <h2>File: {{ files[df_id].filename }}</h2>
+      {% for col, s_vals in columns.items() %}
+      <div class="column-block">
+        <h3>Column: {{ col }}</h3>
+        <div class="input-mode-selector">
+          <label>
+            <input type="radio" name="input_mode_{{ df_id }}_{{ col|url_encode }}" value="examples" checked onchange="toggleInputMode(this,'{{ df_id }}','{{ col|url_encode }}')">
+            Give Target Values
+          </label>
+          <label>
+            <input type="radio" name="input_mode_{{ df_id }}_{{ col|url_encode }}" value="prompt" onchange="toggleInputMode(this,'{{ df_id }}','{{ col|url_encode }}')">
+            Give Prompt
+          </label>
+        </div>
+
+        <div id="examples-container-{{ df_id }}-{{ col|url_encode }}" class="examples-container">
+          <ul>
+            {% for s_val in s_vals[:3] %}
+            <li>
+              Source: <code>{{ s_val }}</code><br>
+              Target:
+              <input type="text" name="target_val_{{ df_id }}_{{ col|url_encode }}_{{ loop.index0 }}">
+              <input type="hidden" name="source_val_{{ df_id }}_{{ col|url_encode }}_{{ loop.index0 }}" value="{{ s_val|url_encode }}">
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div id="prompt-container-{{ df_id }}-{{ col|url_encode }}" class="prompt-container" style="display:none;">
+          <label for="prompt_text_{{ df_id }}_{{ col|url_encode }}">Enter transformation prompt:</label><br>
+          <textarea name="prompt_text_{{ df_id }}_{{ col|url_encode }}"></textarea>
+          <input type="hidden" name="source_samples_{{ df_id }}_{{ col|url_encode }}" value="{{ s_vals|join('|||')|url_encode }}">
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+    <input type="submit" value="Transform" class="submit-btn">
+  </form>
+
+  <a href="/">Start Over</a>
+
+  <!-- Help popup -->
+  <div class="popup" id="helpPopup">
+    <div class="popup-content">
+      <span class="close" onclick="closePopup()">&times;</span>
+      <h2>Help</h2>
+      <p>Choose 'Give Target Values' to enter example outputs for each sample, or 'Give Prompt' to provide a general transformation instruction.</p>
+    </div>
+  </div>
+
+  <script>
+    function toggleInputMode(radio, dfId, colName) {
+      const examplesDiv = document.getElementById(`examples-container-${dfId}-${colName}`);
+      const promptDiv = document.getElementById(`prompt-container-${dfId}-${colName}`);
+      const exampleInputs = examplesDiv.querySelectorAll('input[type="text"]');
+      const promptTextarea = promptDiv.querySelector('textarea');
+      if (radio.value === 'examples') {
+        examplesDiv.style.display = 'block';
+        promptDiv.style.display = 'none';
+        exampleInputs.forEach(input => input.required = true);
+        promptTextarea.required = false;
+      } else {
+        examplesDiv.style.display = 'none';
+        promptDiv.style.display = 'block';
+        exampleInputs.forEach(input => input.required = false);
+        promptTextarea.required = true;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('input[name^="input_mode_"]:checked').forEach(radio => {
+        if (radio.checked) {
+          toggleInputMode(radio, radio.name.split('_')[2], radio.name.split('_')[3]);
+        }
+      });
+    });
+
+    function openPopup() { document.getElementById("helpPopup").style.display = "block"; }
+    function closePopup() { document.getElementById("helpPopup").style.display = "none"; }
+  </script>
+</body>
+</html>

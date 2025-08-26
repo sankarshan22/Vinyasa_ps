@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinyãsa - Upload Files</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0d0d0d;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 10%;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ff4c60;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 40px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: #ccc;
+      font-weight: 500;
+      position: relative;
+      transition: 0.3s ease;
+      cursor: pointer;
+    }
+
+    nav ul li a:hover,
+    nav ul li a.active {
+      color: #ff4c60;
+    }
+
+    nav ul li a::after {
+      content: '';
+      position: absolute;
+      width: 0%;
+      height: 2px;
+      background: #ff4c60;
+      left: 0;
+      bottom: -6px;
+      transition: 0.3s ease;
+    }
+
+    nav ul li a:hover::after,
+    nav ul li a.active::after {
+      width: 100%;
+    }
+
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 50px 20px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #ff4c60;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    p.desc {
+      font-size: 1rem;
+      color: #aaa;
+      margin: 15px 0 30px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    #drop-area {
+      border: 2px dashed #ff4c60;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 600px;
+      padding: 50px;
+      text-align: center;
+      color: #ccc;
+      cursor: pointer;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    #drop-area.highlight {
+      background: rgba(255, 76, 96, 0.1);
+    }
+
+    #drop-area p {
+      font-size: 1rem;
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    #file-list {
+      margin-top: 15px;
+      font-style: italic;
+      color: #aaa;
+    }
+
+    #submit-btn {
+      background-color: #ff4c60;
+      color: #0d0d0d;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-top: 30px;
+      display: none;
+      transition: 0.3s ease;
+    }
+
+    #submit-btn:hover {
+      background: #ff4c60;
+      box-shadow: 0 0 15px #ff4c60;
+      transform: scale(1.05);
+    }
+
+    .submit-container {
+      text-align: center;
+    }
+
+    /* Popup Styles */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-content {
+      background: #1a1a1a;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      color: #fff;
+    }
+
+    .popup-content h2 {
+      color: #ff4c60;
+      margin-bottom: 15px;
+    }
+
+    .popup-content p {
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
+    .popup-content button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: #ff4c60;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .popup-content button:hover {
+      background: #ff5c70;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">Vinyãsa</div>
+    <nav>
+      <ul>
+        <li><a href="#">About us</a></li>
+        <li><a href="#" id="helpLink">Help</a></li>
+        <li><a href="https://github.com/sankarshan22/tabula-x" target="_blank">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Upload File(s)</h1>
+    <p class="desc">Upload your CSV or JSON files below. You can select multiple files. The transformation steps will be
+      applied to all of them.</p>
+
+    <form id="upload-form" method="post" enctype="multipart/form-data" action="/upload">
+      <div id="drop-area">
+        <p>Drag & Drop files here, or <span style="color: #ff4c60; font-weight:600;">Click to Select</span></p>
+        <p id="file-list"></p>
+        <input type="file" name="file" multiple required id="file-input">
+      </div>
+      <div class="submit-container"><input type="submit" value="Upload" id="submit-btn"></div>
+    </form>
+  </main>
+
+  <!-- Help Popup -->
+  <div class="popup" id="helpPopup">
+    <div class="popup-content">
+      <h2>Help Assistance</h2>
+      <p>Please feel free to contact us for any issue you're facing with our project page.</p>
+      <p><strong>Our contact info:</strong></p>
+      <p><strong>Vinyãsa group</strong></p>
+      <p>📞 9391797390</p>
+      <p>✉️ Akash@gmail.com</p>
+      <button onclick="document.getElementById('helpPopup').style.display='none';">Close</button>
+    </div>
+  </div>
+
+  <script>
+    let dropArea = document.getElementById('drop-area'),
+      fileInput = document.getElementById('file-input'),
+      fileList = document.getElementById('file-list'),
+      submitBtn = document.getElementById('submit-btn');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+    });
+
+    dropArea.addEventListener('drop', e => { handleFiles(e.dataTransfer.files); }, false);
+    dropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', function () { handleFiles(this.files); });
+
+    function handleFiles(files) {
+      if (files.length > 0) {
+        fileInput.files = files;
+        fileList.textContent = `${files.length} file(s) selected: ${Array.from(files).map(f => f.name).join(', ')}`;
+        submitBtn.style.display = 'inline-block';
+      }
+    }
+
+    // Popup Script
+    document.getElementById("helpLink").addEventListener("click", function (e) {
+      e.preventDefault();
+      document.getElementById("helpPopup").style.display = "flex";
+    });
+  </script>
+</body>
+
+</html>

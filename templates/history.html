@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transformation History | Vinyãsa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+
+    body {
+      background-color: #0d0d0d;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 10%;
+      background-color: transparent;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ff4c60;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 30px;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      color: #ccc;
+      font-weight: 500;
+      position: relative;
+      transition: 0.3s ease;
+    }
+
+    nav ul li a:hover,
+    nav ul li a.active {
+      color: #ff4c60;
+    }
+
+    nav ul li a::after {
+      content: '';
+      position: absolute;
+      width: 0%;
+      height: 2px;
+      background-color: #ff4c60;
+      left: 0;
+      bottom: -6px;
+      transition: 0.3s ease;
+    }
+
+    nav ul li a:hover::after,
+    nav ul li a.active::after {
+      width: 100%;
+    }
+
+    .main-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      min-height: calc(100vh - 80px);
+      padding: 40px 20px;
+    }
+
+    h1 {
+      color: #ff4c60;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    table {
+      width: 90%;
+      max-width: 1000px;
+      border-collapse: collapse;
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid #333;
+      text-align: center;
+    }
+
+    th {
+      background-color: #ff4c60;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    tr:hover td {
+      background-color: #292929;
+    }
+
+    a.download-link {
+      color: #ff4c60;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a.download-link:hover {
+      text-decoration: underline;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-top: 30px;
+      background-color: #ff4c60;
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .back-button:hover {
+      background-color: #ff5c70;
+      transform: scale(1.03);
+    }
+
+    p.no-history {
+      text-align: center;
+      color: #bbb;
+      font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      table, th, td {
+        font-size: 14px;
+      }
+
+      nav ul {
+        flex-direction: column;
+        gap: 15px;
+        background: #1a1a1a;
+        padding: 10px;
+        border-radius: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">Vinyãsa</div>
+    <nav>
+      <ul>
+        <li><a href="#">About us</a></li>
+        <li><a href="#">Help</a></li>
+        <li><a href="https://github.com/sankarshan22/tabula-x" target="_blank">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="main-content">
+    <h1>Transformation History</h1>
+
+    {% if history_data %}
+    <table>
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Date</th>
+          <th>CSV</th>
+          <th>JSON</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in history_data %}
+        <tr>
+          <td>{{ record.filename }}</td>
+          <td>{{ record.timestamp }}</td>
+          <td><a class="download-link" href="/download_from_db/{{ record._id }}/csv">Download CSV</a></td>
+          <td><a class="download-link" href="/download_from_db/{{ record._id }}/json">Download JSON</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="no-history">No transformation history found.</p>
+    {% endif %}
+
+    <a href="/upload" class="back-button">Back to Upload</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinyãsa - Review Proposed Transformations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #0d0d0d; color: #fff; overflow-x: hidden; padding: 50px 10%; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 40px; }
+    .logo { font-size: 28px; font-weight: 700; color: #ff4c60; }
+    nav ul { list-style: none; display: flex; gap: 40px; }
+    nav ul li a { text-decoration: none; color: #ccc; font-weight: 500; position: relative; transition: 0.3s ease; }
+    nav ul li a:hover, nav ul li a.active { color: #ff4c60; }
+    nav ul li a::after { content: ''; position: absolute; width: 0%; height: 2px; background: #ff4c60; left: 0; bottom: -6px; transition: 0.3s ease; }
+    nav ul li a:hover::after, nav ul li a.active::after { width: 100%; }
+
+    h1 { font-size: 2.5rem; color: #ff4c60; margin-bottom: 30px; text-align: center; }
+
+    .file-section {
+      border: 2px dashed #ff4c60;
+      padding: 30px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      background: #1a1a1a;
+    }
+
+    .file-section h2 {
+      font-size: 1.5rem;
+      color: #ff4c60;
+      margin-bottom: 20px;
+    }
+
+    .review-box {
+      border: 1px solid #444;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 8px;
+      background: #0d0d0d;
+    }
+
+    .review-box h3 {
+      font-size: 1.2rem;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+
+    .review-box p {
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+
+    .code-block {
+      background-color: #1a1a1a;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+
+    .code-block code {
+      color: #ff4c60;
+    }
+
+    .prompt-block {
+      background-color: #1a1a1a;
+      border-left: 4px solid #ff4c60;
+      padding: 10px;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
+    .action-block {
+      background-color: #1a1a1a;
+      border-left: 4px solid #ff4c60;
+      padding: 10px;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 8px; }
+
+    code {
+      background: #333;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #ff4c60;
+    }
+
+    .submit-btn {
+      display: block;
+      background-color: #ff4c60;
+      color: #0d0d0d;
+      padding: 20px 40px;
+      font-size: 1.2em;
+      font-weight: 600;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      margin: 40px auto;
+      transition: 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      box-shadow: 0 0 15px #ff4c60;
+      transform: scale(1.05);
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      color: #ff4c60;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">Vinyãsa</div>
+    <nav>
+      <ul>
+        <!-- <li><a href="#" class="active">Home</a></li> -->
+        <li><a href="#">About us</a></li>
+        <li><a href="#">Help</a></li>
+        <li><a href="https://github.com/sankarshan22/tabula-x" target="_blank">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1>Step 4: Review All Proposed Transformations</h1>
+
+  <form method="post" action="/process_transformation">
+    {% for df_id, review_items in review_data_by_file.items() %}
+    <div class="file-section">
+      <h2>File: {{ files[df_id].filename }}</h2>
+      {% if review_items %}
+        {% for item in review_items %}
+        <div class="review-box">
+          <h3>Source Column: {{ item.col_name }}</h3>
+          <p><b>Transformation Type:</b> <span style="color: #ff4c60;">{{ item.type }}</span></p>
+          {% if item.type == 'General' %}
+          <p><b>Proposed Action:</b></p>
+          <div class="action-block">
+            Create the following new column(s):
+            <ul>{% for name in item.new_column_names %}<li><strong>{{ name }}</strong></li>{% endfor %}</ul>
+            This will be populated by using the values in '{{ item.col_name }}' to look up their corresponding matches.
+          </div>
+          {% else %}
+          <p><b>LLM Generated Code:</b></p>
+          <pre class="code-block"><code>{{ item.code }}</code></pre>
+          {% endif %}
+          {% if item.input_method == 'prompt' %}
+          <p><b>User-Provided Prompt:</b></p>
+          <div class="prompt-block">"{{ item.prompt }}"</div>
+          {% else %}
+          <p><b>User-Provided Examples:</b></p>
+          <ul>{% for s_val, t_val in item.examples %}<li>Source: <code>{{ s_val }}</code> -> Target: <code>{{ t_val }}</code></li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <p>No transformations were defined for this file.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <input type="submit" value="Confirm and Perform All Transformations" class="submit-btn">
+  </form>
+
+  <a href="/">Start Over</a>
+</body>
+
+</html>

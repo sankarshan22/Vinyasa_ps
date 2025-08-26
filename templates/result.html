@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinyãsa - Batch Transformation Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #0d0d0d; color: #fff; padding: 50px 10%; }
+
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 40px; }
+    .logo { font-size: 28px; font-weight: 700; color: #ff4c60; }
+
+    h1 { font-size: 2.5rem; color: #ff4c60; margin-bottom: 30px; text-align: center; }
+
+    .file-result-box {
+      border: 2px dashed #ff4c60;
+      padding: 30px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      background: #1a1a1a;
+    }
+
+    .file-result-box h2 {
+      font-size: 1.5rem;
+      color: #ff4c60;
+      margin-bottom: 20px;
+    }
+
+    h4 {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #ff4c60;
+    }
+
+    ul { list-style: none; padding-left: 0; }
+    li { margin-bottom: 8px; font-size: 0.95rem; }
+
+    .report-box {
+      background: #0d0d0d;
+      border: 1px solid #444;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .report-box h3 {
+      font-size: 1.2rem;
+      color: #ccc;
+      margin-bottom: 15px;
+    }
+
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .report-table th, .report-table td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #333;
+    }
+
+    .report-table th { color: #ff4c60; }
+
+    .download-btn {
+      display: inline-block;
+      padding: 12px 25px;
+      margin: 15px 10px 5px 0;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      color: #0d0d0d;
+      background-color: #ff4c60;
+      border: none;
+      cursor: pointer;
+      font-size: 1em;
+      transition: 0.3s ease;
+    }
+
+    .download-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ff4c60;
+    }
+
+    .reattempt-box {
+      border: 2px dashed #ff4c60;
+      background-color: #1a1a1a;
+      padding: 20px;
+      margin-top: 30px;
+      border-radius: 10px;
+    }
+
+    .reattempt-box h4 {
+      color: #ff4c60;
+      margin-bottom: 10px;
+    }
+
+    .reattempt-btn {
+      background-color: #ff4c60;
+      color: #0d0d0d !important;
+    }
+
+    .reattempt-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ff4c60;
+    }
+
+    a {
+      color: #ff4c60;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    hr {
+      border: 1px solid #444;
+      margin: 50px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">Vinyãsa</div>
+  </header>
+
+  <h1>Final Results</h1>
+  <p style="text-align:center; margin-bottom: 50px;">The transformations have been applied. See the report and download options for each file below.</p>
+
+  {% for df_id, result in batch_results.items() %}
+  <div class="file-result-box">
+    <h2>File: {{ result.filename }}</h2>
+    {% set generation_errors, runtime_errors = {}, {} %}
+    {% if result.errors %}
+      {% for col, err in result.errors.items() %}
+        {% if 'code' in err or 'LLM' in err or 'API' in err or 'column name' in err or 'JSON' in err %}
+          {% set _ = generation_errors.update({col: err}) %}
+        {% else %}
+          {% set _ = runtime_errors.update({col: err}) %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% if runtime_errors %}
+      <h4>Runtime Errors</h4>
+      <ul>{% for col, err in runtime_errors.items() %}<li style="color:#dc3545"><strong>{{ col }}:</strong> {{ err }}</li>{% endfor %}</ul>
+    {% endif %}
+     
+    <h4>Successful Transformations</h4>
+    {% if result.successful_reports %}
+      {% for col_name, report in result.successful_reports.items() %}
+      <div class="report-box">
+        <h3>Transformation Report: {{ col_name }}</h3>
+        <table class="report-table">
+          <tr><th>Metric</th><th>Result</th></tr>
+          {% for key, value in report.items() %}
+          <tr><td>{{ key|replace('_',' ')|title }}</td><td>{{ value }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p>None.</p>
+    {% endif %}
+
+    {% if generation_errors %}
+    <div class="reattempt-box">
+      <h4>Failed Transformations</h4>
+      <p>The following columns failed at the generation step. You can reattempt them.</p>
+      <ul>{% for col, err in generation_errors.items() %}<li><strong>{{ col }}:</strong> {{ err }}</li>{% endfor %}</ul>
+      <form method="post" action="/reattempt" style="margin-top:15px;">
+        <input type="hidden" name="df_id" value="{{ df_id }}">
+        <input type="submit" value="Reattempt Failed Transformations" class="download-btn reattempt-btn">
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- <div style="margin-top:25px;">
+      <a href="/download/{{ df_id }}/csv" class="download-btn">Download CSV</a>
+      <a href="/download/{{ df_id }}/json" class="download-btn">Download JSON</a>
+    </div>
+  </div>
+  {% endfor %} -->
+
+  <!-- ✅ Added "Download All as ZIP" button here -->
+  <div style="text-align: center; margin-top: 40px;">
+    <a href="/download-all-zip" class="download-btn" style="font-size:1.1rem;">Download All as ZIP</a>
+  </div>
+
+  <!-- 🚀 Merge All Files Button -->
+  <div style="text-align: center; margin-top: 20px;">
+    <form method="post" action="/merge_files" style="display:inline;">
+      <button type="submit" class="download-btn" style="background:#007bff; color:#fff;">Merge All Files</button>
+    </form>
+  </div>
+
+  <hr>
+  <a href="/" style="display:block; text-align:center; font-size:1.2em; font-weight:bold;">Start a New Batch Transformation</a>
+</body>
+
+</html>
