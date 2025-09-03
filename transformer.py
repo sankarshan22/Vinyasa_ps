@@ -5,8 +5,8 @@ import os
 import google.generativeai as genai
 
 
-#GOOGLE_API_KEY = "AIzaSyAjCd35y22JJRu7C3wA0j0r6j7FU2GUEEs"
-GOOGLE_API_KEY = "AIzaSyA_YMbw8MXOC6wtkzdUV_JQ7BiPv9DhfY0"
+
+GOOGLE_API_KEY = " " 
 GOOGLE_MODEL_NAME = "gemini-1.5-flash-latest"
 
 gemini_model = None
