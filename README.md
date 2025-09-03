@@ -1,7 +1,3 @@
-Perfect, thanks for sharing the real structure. Since your project isn’t just a backend script but a **Flask web app** (with `app.py` and templates), the README should reflect that. Here’s the updated version with the correct structure and a short section about running the web interface:
-
----
-
 # Vinayasa: Tabular Transformation Service
 
 **Vinayasa** (from the Sanskrit root *nyāsa*, meaning placement or arrangement, with the prefix *vi-* denoting "special" or "careful") can be interpreted as "careful arrangement" or "systematic placement." In yoga, *vinayasa* refers to a flowing, ordered sequence—just like how this framework brings structure to messy tabular data through transformations.
